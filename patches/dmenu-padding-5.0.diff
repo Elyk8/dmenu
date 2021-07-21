@@ -12,7 +12,7 @@ diff --git a/dmenu.1 b/dmenu.1
 index 323f93c..a4ecbbb 100644
 --- a/dmenu.1
 +++ b/dmenu.1
-@@ -8,6 +8,12 @@ dmenu \- dynamic menu
+@@ -8,6 +8,10 @@ dmenu \- dynamic menu
  .IR lines ]
  .RB [ \-m
  .IR monitor ]
@@ -23,7 +23,7 @@ index 323f93c..a4ecbbb 100644
  .RB [ \-p
  .IR prompt ]
  .RB [ \-fn
-@@ -54,6 +60,24 @@ dmenu lists items vertically, with the given number of lines.
+@@ -54,6 +60,21 @@ dmenu lists items vertically, with the given number of lines.
  dmenu is displayed on the monitor number supplied. Monitor numbers are starting
  from 0.
  .TP
@@ -92,7 +92,7 @@ index 65f25ce..7be19ae 100644
  	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
  	exit(1);
  }
-@@ -717,6 +721,12 @@ main(int argc, char *argv[])
+@@ -717,6 +719,10 @@ main(int argc, char *argv[])
  		/* these options take one argument */
  		else if (!strcmp(argv[i], "-l"))   /* number of lines in vertical list */
  			lines = atoi(argv[++i]);
