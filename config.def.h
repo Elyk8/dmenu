@@ -5,9 +5,11 @@ static int topbar = 1;                      /* -b  option; if 0, dmenu appears a
 static int centered = 0;                    /* -c option; centers dmenu on screen */
 static int min_width = 500;                    /* minimum width when centered */
 static int fuzzy = 1;                      /* -F  option; if 0, dmenu doesn't use fuzzy matching     */
+static int sp = 15; /* put dmenu at this x offset */
+static int vp = 15; /* put dmenu at this y offset (measured from the bottom if topbar is 0) */
 /* -fn option overrides fonts[0]; default X11 font or font set */
 static const char *fonts[] = {
-	"monospace:size=12",
+	"monospace:size=10",
 	"Twemoji:size=10"
 };
 static const unsigned int bgalpha = 0xe0;
@@ -31,7 +33,7 @@ static const unsigned int alphas[SchemeLast][2] = {
 };
 
 /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
-static unsigned int lines      = 0;
+static unsigned int lines = 0;
 /* -h option; minimum height of a menu line */
 static unsigned int lineheight = 40;
 static unsigned int min_lineheight = 8;
@@ -41,3 +43,6 @@ static unsigned int min_lineheight = 8;
  * for example: " /?\"&[]"
  */
 static const char worddelimiters[] = " ";
+
+/* Size of the window border */
+static unsigned int border_width = 3;

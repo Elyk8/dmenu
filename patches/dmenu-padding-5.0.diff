@@ -1,17 +1,16 @@
-From 7dc7cb96cdda9ad66e33109223c4cc297a7721d1 Mon Sep 17 00:00:00 2001
-From: Alex Cole <ajzcole@airmail.cc>
-Date: Tue, 6 Oct 2020 10:42:07 +1300
-Subject: [PATCH] Updated xyw for 5.0 properly
-
----
- dmenu.1 | 24 ++++++++++++++++++++++++
- dmenu.c | 22 ++++++++++++++++------
- 2 files changed, 40 insertions(+), 6 deletions(-)
-
-diff --git a/dmenu.1 b/dmenu.1
-index 323f93c..a4ecbbb 100644
---- a/dmenu.1
-+++ b/dmenu.1
+diff '--color=auto' -up dmenu-5.0/config.def.h dmenu-5.0.~1~/config.def.h
+--- dmenu-5.0/config.def.h	2021-07-22 15:21:13.272072551 +1000
++++ dmenu-5.0.~1~/config.def.h	2021-07-22 15:23:59.602754290 +1000
+@@ -21,3 +21,6 @@ static unsigned int lines      = 0;
+  * for example: " /?\"&[]"
+  */
+ static const char worddelimiters[] = " ";
++
++static int sp = 0; /* put dmenu at this horizontal offset */
++static int vp = 0; /* put dmenu at this vertical offset (measured from the bottom if topbar is 0) */
+diff '--color=auto' -up dmenu-5.0/dmenu.1 dmenu-5.0.~1~/dmenu.1
+--- dmenu-5.0/dmenu.1	2021-07-22 15:21:13.272072551 +1000
++++ dmenu-5.0.~1~/dmenu.1	2021-07-22 15:24:36.152902329 +1000
 @@ -8,6 +8,10 @@ dmenu \- dynamic menu
  .IR lines ]
  .RB [ \-m
@@ -23,7 +22,7 @@ index 323f93c..a4ecbbb 100644
  .RB [ \-p
  .IR prompt ]
  .RB [ \-fn
-@@ -54,6 +60,21 @@ dmenu lists items vertically, with the given number of lines.
+@@ -54,6 +58,21 @@ dmenu lists items vertically, with the g
  dmenu is displayed on the monitor number supplied. Monitor numbers are starting
  from 0.
  .TP
@@ -45,20 +44,10 @@ index 323f93c..a4ecbbb 100644
  .BI \-p " prompt"
  defines the prompt to be displayed to the left of the input field.
  .TP
-diff --git a/dmenu.c b/dmenu.c
-index 65f25ce..7be19ae 100644
---- a/dmenu.c
-+++ b/dmenu.c
-@@ -37,6 +37,9 @@ struct item {
- static char text[BUFSIZ] = "";
- static char *embed;
- static int bh, mw, mh;
-+static int sp = 0; /* put dmenu at this x offset */
-+static int vp = 0; /* put dmenu at this y offset (measured from the bottom if topbar is 0) */
- static int inputw = 0, promptw;
- static int lrpad; /* sum of left and right padding */
- static size_t cursor;
-@@ -637,9 +640,9 @@ setup(void)
+diff '--color=auto' -up dmenu-5.0/dmenu.c dmenu-5.0.~1~/dmenu.c
+--- dmenu-5.0/dmenu.c	2021-07-22 15:21:13.272072551 +1000
++++ dmenu-5.0.~1~/dmenu.c	2021-07-22 15:23:43.386021756 +1000
+@@ -637,9 +637,9 @@ setup(void)
  				if (INTERSECT(x, y, 1, 1, info[i]))
  					break;
  
@@ -71,7 +60,7 @@ index 65f25ce..7be19ae 100644
  		XFree(info);
  	} else
  #endif
-@@ -647,9 +650,9 @@ setup(void)
+@@ -647,9 +647,9 @@ setup(void)
  		if (!XGetWindowAttributes(dpy, parentwin, &wa))
  			die("could not get embedding window attributes: 0x%lx",
  			    parentwin);
@@ -84,7 +73,7 @@ index 65f25ce..7be19ae 100644
  	}
  	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
  	inputw = MIN(inputw, mw/3);
-@@ -690,6 +693,7 @@ static void
+@@ -690,6 +690,7 @@ static void
  usage(void)
  {
  	fputs("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
@@ -92,17 +81,14 @@ index 65f25ce..7be19ae 100644
  	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
  	exit(1);
  }
-@@ -717,6 +719,10 @@ main(int argc, char *argv[])
+@@ -717,6 +718,10 @@ main(int argc, char *argv[])
  		/* these options take one argument */
  		else if (!strcmp(argv[i], "-l"))   /* number of lines in vertical list */
  			lines = atoi(argv[++i]);
-+		else if (!strcmp(argv[i], "-sp"))   /* window x offset */
++		else if (!strcmp(argv[i], "-sp"))   /* horizontal offset from screen */
 +			sp = atoi(argv[++i]);
-+		else if (!strcmp(argv[i], "-vp"))   /* window y offset (from bottom up if -b) */
++		else if (!strcmp(argv[i], "-vp"))   /* vertical offset (from bottom up if -b) */
 +			vp = atoi(argv[++i]);
- 		else if (!strcmp(argv[k], "-m"))
+ 		else if (!strcmp(argv[i], "-m"))
  			mon = atoi(argv[++i]);
  		else if (!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
--- 
-2.28.0
-
