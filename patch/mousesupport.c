@@ -23,7 +23,7 @@ buttonpress(XEvent *e)
 	 *       add that to the input width */
 	if (ev->button == Button1 &&
 	   ((lines <= 0 && ev->x >= 0 && ev->x <= x + w +
-	   ((!prev || !curr->left) ? TEXTW("<") : 0)) ||
+	   ((!prev || !curr->left) ? TEXTW(symbol_1) : 0)) ||
 	   (lines > 0 && ev->y >= y && ev->y <= y + h))) {
 		insert(NULL, -cursor);
 		drawmenu();
@@ -75,7 +75,7 @@ buttonpress(XEvent *e)
 	} else if (matches) {
 		/* left-click on left arrow */
 		x += inputw;
-		w = TEXTW("<");
+		w = TEXTW(symbol_1);
 		if (prev && curr->left) {
 			if (ev->x >= x && ev->x <= x + w) {
 				sel = curr = prev;
@@ -87,7 +87,7 @@ buttonpress(XEvent *e)
 		/* horizontal list: (ctrl)left-click on item */
 		for (item = curr; item != next; item = item->right) {
 			x += w;
-			w = MIN(TEXTW(item->text), mw - x - TEXTW(">"));
+			w = MIN(TEXTW(item->text), mw - x - TEXTW(symbol_2));
 			if (ev->x >= x && ev->x <= x + w) {
 				puts(item->text);
 				if (!(ev->state & ControlMask)) {
@@ -102,7 +102,7 @@ buttonpress(XEvent *e)
 			}
 		}
 		/* left-click on right arrow */
-		w = TEXTW(">");
+		w = TEXTW(symbol_2);
 		x = mw - w;
 		if (next && ev->x >= x && ev->x <= x + w) {
 			sel = curr = next;
