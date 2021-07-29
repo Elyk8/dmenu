@@ -1,2 +1,0 @@
-# dmenu
-My dmenu build
