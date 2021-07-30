@@ -35,7 +35,6 @@ enum {
 	SchemeNorm,
 	SchemeSel,
 	SchemeOut,
-	SchemeMid,
 	SchemeNormHighlight,
 	SchemeSelHighlight,
 	SchemeHover,
@@ -281,8 +280,6 @@ drawitem(struct item *item, int x, int y, int w)
 
 	if (item == sel)
 		drw_setscheme(drw, scheme[SchemeSel]);
-	else if (item->left == sel || item->right == sel)
-		drw_setscheme(drw, scheme[SchemeMid]);
 	else if (item->out)
 		drw_setscheme(drw, scheme[SchemeOut]);
 	else
@@ -1091,7 +1088,7 @@ main(int argc, char *argv[])
 			center = !center;
 		} else if (!strcmp(argv[i], "-f")) { /* grabs keyboard before reading stdin */
 			fast = 1;
-		} else if (!strcmp(argv[i], "-i")) { /* case-sensitive item matching */
+		} else if (!strcmp(argv[i], "-s")) { /* case-sensitive item matching */
 			fstrncmp = strncmp;
 			fstrstr = strstr;
 		} else if (!strcmp(argv[i], "-x")) { /* invert use_prefix */

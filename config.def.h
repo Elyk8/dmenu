@@ -29,7 +29,6 @@ char *colors[][2] = {
 	[SchemeNorm] = { "#bbbbbb", "#222222" },
 	[SchemeSel]  = { "#eeeeee", "#005577" },
 	[SchemeOut]  = { "#000000", "#00ffff" },
-	[SchemeMid]  = { "#eeeeee", "#770000" },
 	[SchemeSelHighlight]  = { "#ffc978", "#005577" },
 	[SchemeNormHighlight] = { "#ffc978", "#222222" },
 	[SchemeHover]  = { "#ffffff", "#353D4B" },

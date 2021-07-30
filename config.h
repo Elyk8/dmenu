@@ -16,7 +16,7 @@ static const char *prompt      = NULL;      /* -p  option; prompt to the left of
 static const char *symbol_1 = "<";
 static const char *symbol_2 = ">";
 
-static const unsigned int baralpha = 0xe0; 
+static const unsigned int baralpha = 0xff; 
 static const unsigned int borderalpha = OPAQUE;
 static const unsigned int alphas[][3]      = {
 	/*               fg      bg        border     */
@@ -30,7 +30,6 @@ char *colors[][2] = {
 	[SchemeNorm] = { "#bbbbbb", "#222222" },
 	[SchemeSel]  = { "#eeeeee", "#005577" },
 	[SchemeOut]  = { "#000000", "#00ffff" },
-	[SchemeMid]  = { "#eeeeee", "#770000" },
 	[SchemeSelHighlight]  = { "#ffc978", "#005577" },
 	[SchemeNormHighlight] = { "#ffc978", "#222222" },
 	[SchemeHover]  = { "#ffffff", "#353D4B" },
@@ -47,7 +46,7 @@ static unsigned int columns    = 0;
 static unsigned int lineheight = 0;         /* -h option; minimum height of a menu line     */
 static unsigned int min_lineheight = 35;
 static unsigned int maxhist    = 15;
-static int histnodup           = 1;	/* if 0, record repeated histories */
+static int histnodup           = 0;	/* if 0, record repeated histories */
 
 /*
  * Characters not considered part of a word while deleting words
