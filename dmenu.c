@@ -57,8 +57,6 @@ static char text[BUFSIZ] = "";
 static char pipeout[8] = " | dmenu";
 static char *embed;
 static int bh, mw, mh;
-static int dmx = 0, dmy = 0; /* put dmenu at these x and y offsets */
-static unsigned int dmw = 0; /* make dmenu this wide */
 static int inputw = 0, promptw;
 static int passwd = 0;
 static int lrpad; /* sum of left and right padding */
@@ -982,9 +980,9 @@ setup(void)
 			x = info[i].x_org + ((info[i].width  - mw) / 2);
 			y = info[i].y_org + ((info[i].height - mh) / 2);
 		} else {
-			x = info[i].x_org + dmx;
-			y = info[i].y_org + (topbar ? dmy : info[i].height - mh - dmy);
-			mw = (dmw>0 ? dmw : info[i].width);
+            x = info[i].x_org + sp;
+    		y = info[i].y_org + (topbar ? vp : info[i].height - mh - vp);
+    		mw = info[i].width - 2 * sp;
 		}
 		XFree(info);
 	} else
@@ -998,9 +996,9 @@ setup(void)
 			x = (wa.width  - mw) / 2;
 			y = (wa.height - mh) / 2;
 		} else {
-			x = dmx;
-			y = topbar ? dmy : wa.height - mh - dmy;
-			mw = (dmw>0 ? dmw : wa.width);
+            x = sp;
+            y = topbar ? vp : wa.height - mh - vp;
+            mw = wa.width - 2 * sp;
 		}
 	}
 	inputw = MIN(inputw, mw/3);
@@ -1064,7 +1062,7 @@ usage(void)
 		" [-bw width]"
 		" [-h height]"
 		" [-H histfile]"
-		" [-X xoffset] [-Y yoffset] [-W width]" // (arguments made upper case due to conflicts)
+        " [-sp sidepad] [-vp verticalpad]"
 		"\n [-nhb color] [-nhf color] [-shb color] [-shf color]" // highlight colors
 		"\n", stderr);
 	exit(1);
@@ -1111,12 +1109,10 @@ main(int argc, char *argv[])
 		}
 		else if (!strcmp(argv[i], "-l"))   /* number of lines in vertical list */
 			lines = atoi(argv[++i]);
-		else if (!strcmp(argv[i], "-X"))   /* window x offset */
-			dmx = atoi(argv[++i]);
-		else if (!strcmp(argv[i], "-Y"))   /* window y offset (from bottom up if -b) */
-			dmy = atoi(argv[++i]);
-		else if (!strcmp(argv[i], "-W"))   /* make dmenu this wide */
-			dmw = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-sp"))   /* horizontal window offset */
+			sp = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-vp"))   /* vertical window offset (from bottom up if -b) */
+			vp = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-m"))
 			mon = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-o"))  /* opacity, pass -o 0 to disable alpha */
