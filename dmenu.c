@@ -945,7 +945,7 @@ setup(void)
 
 	/* calculate menu geometry */
 	bh = drw->fonts->h + 2;
-	bh = MAX(bh,lineheight);	/* make a menu line AT LEAST 'lineheight' tall */
+	bh = MAX(bh,lineheight) + border_width;	/* make a menu line AT LEAST 'lineheight' tall */
 	lines = MAX(lines, 0);
 	mh = (lines + 1) * bh;
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
@@ -982,7 +982,7 @@ setup(void)
 		} else {
             x = info[i].x_org + sp;
     		y = info[i].y_org + (topbar ? vp : info[i].height - mh - vp);
-    		mw = info[i].width - 2 * sp;
+    		mw = info[i].width - 2 * (sp + border_width);
 		}
 		XFree(info);
 	} else
@@ -998,7 +998,7 @@ setup(void)
 		} else {
             x = sp;
             y = topbar ? vp : wa.height - mh - vp;
-            mw = wa.width - 2 * sp;
+            mw = wa.width - 2 * (sp + border_width);
 		}
 	}
 	inputw = MIN(inputw, mw/3);
