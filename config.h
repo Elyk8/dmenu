@@ -11,7 +11,7 @@ static int min_width = 800;                 /* minimum width when centered */
 static char *fonts[] =
 {
 	"monospace:size=10",
-	"Joypixels:size=10"
+	"Twemoji:size=8"
 };
 static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
 static const char *symbol_1 = "<";

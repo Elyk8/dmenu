@@ -775,7 +775,12 @@ insert:
 		}
 		break;
 	case XK_Tab:
-		if (!matches) break; /* cannot complete no matches */
+		if (!matches)
+			break; /* cannot complete no matches */
+		/* only do tab completion if all matches start with prefix */
+		for (item = matches; item && item->text; item = item->right)
+			if (item->text[0] != text[0])
+				goto draw;
 		strncpy(text, matches->text, sizeof text - 1);
 		text[sizeof text - 1] = '\0';
 		len = cursor = strlen(text); /* length of longest common prefix */
