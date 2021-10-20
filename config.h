@@ -2,6 +2,7 @@
 /* Default settings; can be overriden by command line. */
 
 static int topbar = 1;                      /* -b  option; if 0, dmenu appears at bottom */
+static int opacity = 0;                     /* -o  option; if 0, then alpha is disabled */
 static int fuzzy = 1;                       /* -F  option; if 0, dmenu doesn't use fuzzy matching */
 static int center = 0;                      /* -c  option; if 0, dmenu won't be centered on the screen */
 static int sp = 0;                          /* put dmenu at this horizontal offset */
@@ -11,11 +12,19 @@ static int min_width = 800;                 /* minimum width when centered */
 static char *fonts[] =
 {
 	"monospace:size=10",
-	"Twemoji:size=8"
+	"Noto Color Emoji:size=8"
 };
 static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
 static const char *symbol_1 = "<";
 static const char *symbol_2 = ">";
+
+static const unsigned int baralpha = 0xd0;
+static const unsigned int borderalpha = OPAQUE;
+static const unsigned int alphas[][3]      = {
+	/*               fg      bg        border     */
+	[SchemeNorm] = { OPAQUE, baralpha, borderalpha },
+	[SchemeSel]  = { OPAQUE, baralpha, borderalpha },
+};
 
 static
 char *colors[][2] = {

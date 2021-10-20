@@ -27,6 +27,8 @@
                              * MAX(0, MIN((y)+(h),(r).y_org+(r).height) - MAX((y),(r).y_org)))
 #define LENGTH(X)             (sizeof X / sizeof X[0])
 #define TEXTW(X)              (drw_fontset_getwidth(drw, (X)) + lrpad)
+#define OPAQUE                0xffU
+#define OPACITY               "_NET_WM_WINDOW_OPACITY"
 
 /* enums */
 enum {
@@ -63,7 +65,6 @@ static struct item *items = NULL;
 static struct item *matches, *matchend;
 static struct item *prev, *curr, *next, *sel;
 static int mon = -1, screen;
-static unsigned int sortmatches = 1;
 static int commented = 0;
 static int animated = 0;
 
@@ -72,6 +73,10 @@ static Display *dpy;
 static Window root, parentwin, win;
 static XIC xic;
 
+static int useargb = 0;
+static Visual *visual;
+static int depth;
+static Colormap cmap;
 
 static Drw *drw;
 static Clr *scheme[SchemeLast];
@@ -98,6 +103,7 @@ static size_t nextrune(int inc);
 static void movewordedge(int dir);
 static void keypress(XKeyEvent *ev);
 static void paste(void);
+static void xinitvisual(void);
 static void readstdin(void);
 static void run(void);
 static void setup(void);
@@ -440,9 +446,6 @@ match(void)
 		if (i != tokc) /* not all tokens match */
 			continue;
 		/* exact matches go first, then prefixes, then substrings */
-		if (!sortmatches)
- 			appenditem(item, &matches, &matchend);
- 		else
 		if (!tokc || !fstrncmp(text, item->text, textsize))
 			appenditem(item, &matches, &matchend);
 		else if (!fstrncmp(tokv[0], item->text, len))
@@ -604,10 +607,10 @@ keypress(XKeyEvent *ev)
 			goto draw;
 		case XK_g: ksym = XK_Home;  break;
 		case XK_G: ksym = XK_End;   break;
-		case XK_k: ksym = XK_Up;    break;
-		case XK_l: ksym = XK_Next;  break;
-		case XK_h: ksym = XK_Prior; break;
-		case XK_j: ksym = XK_Down;  break;
+		case XK_h: ksym = XK_Up;    break;
+		case XK_j: ksym = XK_Next;  break;
+		case XK_k: ksym = XK_Prior; break;
+		case XK_l: ksym = XK_Down;  break;
 		case XK_p:
 			navhistory(-1);
 			buf[0]=0;
@@ -816,6 +819,42 @@ paste(void)
 	drawmenu();
 }
 
+static void
+xinitvisual()
+{
+	XVisualInfo *infos;
+	XRenderPictFormat *fmt;
+	int nitems;
+	int i;
+
+	XVisualInfo tpl = {
+		.screen = screen,
+		.depth = 32,
+		.class = TrueColor
+	};
+	long masks = VisualScreenMask | VisualDepthMask | VisualClassMask;
+
+	infos = XGetVisualInfo(dpy, masks, &tpl, &nitems);
+	visual = NULL;
+	for(i = 0; i < nitems; i ++) {
+		fmt = XRenderFindVisualFormat(dpy, infos[i].visual);
+		if (fmt->type == PictTypeDirect && fmt->direct.alphaMask) {
+			visual = infos[i].visual;
+			depth = infos[i].depth;
+			cmap = XCreateColormap(dpy, root, visual, AllocNone);
+			useargb = 1;
+			break;
+		}
+	}
+
+	XFree(infos);
+
+	if (!visual || !opacity) {
+		visual = DefaultVisual(dpy, screen);
+		depth = DefaultDepth(dpy, screen);
+		cmap = DefaultColormap(dpy, screen);
+	}
+}
 
 static void
 readstdin(void)
@@ -861,9 +900,6 @@ run(void)
 		if (XFilterEvent(&ev, win))
 			continue;
 		switch(ev.type) {
-		case ButtonPress:
-			buttonpress(&ev);
-			break;
 		case DestroyNotify:
 			if (ev.xdestroywindow.window != win)
 				break;
@@ -910,7 +946,7 @@ setup(void)
 #endif
 	/* init appearance */
 	for (j = 0; j < SchemeLast; j++)
-		scheme[j] = drw_scm_create(drw, (const char**)colors[j], 2);
+		scheme[j] = drw_scm_create(drw, (const char**)colors[j], alphas[j], 2);
 
 	clip = XInternAtom(dpy, "CLIPBOARD",   False);
 	utf8 = XInternAtom(dpy, "UTF8_STRING", False);
@@ -978,13 +1014,13 @@ setup(void)
 
 	/* create menu window */
 	swa.override_redirect = True;
-	swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
+	swa.background_pixel = 0;
+	swa.colormap = cmap;
 	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask
-		| ButtonPressMask
 	;
-	win = XCreateWindow(dpy, parentwin, x, y, mw, mh, border_width,
-		CopyFromParent, CopyFromParent, CopyFromParent,
-		CWOverrideRedirect | CWBackPixel | CWEventMask, &swa
+	win = XCreateWindow(dpy, parentwin, x, y - (topbar ? 0 : border_width * 2), mw - border_width * 2, mh, border_width,
+		depth, InputOutput, visual,
+		CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &swa
 	);
 	if (border_width)
 		XSetWindowBorder(dpy, win, scheme[SchemeSel][ColBg].pixel);
@@ -1023,12 +1059,12 @@ usage(void)
 		"x"
 		"F"
 		"P"
-		"S"
 		"] "
 		"[-g columns] "
 		"[-l lines] [-p prompt] [-fn font] [-m monitor]"
 		"\n             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]"
 		"\n            "
+		" [ -o opacity]"
 		" [-bw width]"
 		" [-h height]"
 		" [-H histfile]"
@@ -1044,6 +1080,22 @@ main(int argc, char *argv[])
 	XWindowAttributes wa;
 	int i;
 	int fast = 0;
+
+	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
+		fputs("warning: no locale support\n", stderr);
+	if (!(dpy = XOpenDisplay(NULL)))
+		die("cannot open display");
+	screen = DefaultScreen(dpy);
+	root = RootWindow(dpy, screen);
+	if (!embed || !(parentwin = strtol(embed, NULL, 0)))
+		parentwin = root;
+	if (!XGetWindowAttributes(dpy, parentwin, &wa))
+		die("could not get embedding window attributes: 0x%lx",
+		    parentwin);
+
+	xinitvisual();
+	drw = drw_create(dpy, screen, root, wa.width, wa.height, visual, depth, cmap);
+	readxresources();
 
 	for (i = 1; i < argc; i++)
 		/* these options take no arguments */
@@ -1065,8 +1117,6 @@ main(int argc, char *argv[])
 			fuzzy = !fuzzy;
 		} else if (!strcmp(argv[i], "-P")) { /* is the input a password */
 			passwd = 1;
-		} else if (!strcmp(argv[i], "-S")) { /* do not sort matches */
-			sortmatches = 0;
 		} else if (i + 1 == argc)
 			usage();
 		/* these options take one argument */
@@ -1085,6 +1135,8 @@ main(int argc, char *argv[])
 			vp = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-m"))
 			mon = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "-o"))  /* opacity, pass -o 0 to disable alpha */
+			opacity = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
 			prompt = argv[++i];
 		else if (!strcmp(argv[i], "-fn"))  /* font or font set */
@@ -1116,22 +1168,9 @@ main(int argc, char *argv[])
 		else
 			usage();
 
-	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
-		fputs("warning: no locale support\n", stderr);
-	if (!(dpy = XOpenDisplay(NULL)))
-		die("cannot open display");
-	screen = DefaultScreen(dpy);
-	root = RootWindow(dpy, screen);
-	if (!embed || !(parentwin = strtol(embed, NULL, 0)))
-		parentwin = root;
-	if (!XGetWindowAttributes(dpy, parentwin, &wa))
-		die("could not get embedding window attributes: 0x%lx",
-		    parentwin);
-
-	drw = drw_create(dpy, screen, root, wa.width, wa.height);
-	readxresources();
 	if (!drw_fontset_create(drw, (const char**)fonts, LENGTH(fonts)))
 		die("no fonts could be loaded.");
+
 	lrpad = drw->fonts->h;
 
 	if (lineheight == -1)
