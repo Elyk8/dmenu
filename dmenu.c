@@ -607,10 +607,10 @@ keypress(XKeyEvent *ev)
 			goto draw;
 		case XK_g: ksym = XK_Home;  break;
 		case XK_G: ksym = XK_End;   break;
-		case XK_h: ksym = XK_Up;    break;
-		case XK_j: ksym = XK_Next;  break;
-		case XK_k: ksym = XK_Prior; break;
-		case XK_l: ksym = XK_Down;  break;
+		case XK_k: ksym = XK_Up;    break;
+		case XK_l: ksym = XK_Next;  break;
+		case XK_h: ksym = XK_Prior; break;
+		case XK_j: ksym = XK_Down;  break;
 		case XK_p:
 			navhistory(-1);
 			buf[0]=0;
@@ -955,7 +955,7 @@ setup(void)
 	bh = drw->fonts->h + 2;
 	bh = MAX(bh,lineheight);	/* make a menu line AT LEAST 'lineheight' tall */
 	lines = MAX(lines, 0);
-	mh = (lines + 1) * bh;
+	mh = (lines + 1) * bh - 2 * border_width;
 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
 #ifdef XINERAMA
 	i = 0;
@@ -990,7 +990,7 @@ setup(void)
 		} else {
             x = info[i].x_org + sp;
     		y = info[i].y_org + (topbar ? vp : info[i].height - mh - vp);
-    		mw = info[i].width - 2 * (sp + border_width);
+    		mw = info[i].width - 2 * sp;
 		}
 		XFree(info);
 	} else
@@ -1006,7 +1006,7 @@ setup(void)
 		} else {
             x = sp;
             y = topbar ? vp : wa.height - mh - vp;
-            mw = wa.width - 2 * sp;
+            mw = wa.width -  2 * sp;
 		}
 	}
 	inputw = MIN(inputw, mw/3);

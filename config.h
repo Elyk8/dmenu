@@ -58,7 +58,7 @@ static const char startpipe[] = "#";
 static const char worddelimiters[] = " ";
 
 /* Size of the window border */
-static unsigned int border_width = 0;
+static unsigned int border_width = 2;
 
 /*
  * Use prefix matching by default; can be inverted with the -x flag.
